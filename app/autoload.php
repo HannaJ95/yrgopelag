@@ -19,3 +19,6 @@ $config = require __DIR__ . '/config.php';
 
 // Setup the database connection.
 $database = new PDO($config['database_path']);
+
+// Include database queries
+require __DIR__ . '/database/queries.php';
