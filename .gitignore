@@ -1,3 +1,6 @@
 .env
 vendor
 .DS_Store
+app/database/database.db
+app/database/*.db
+*.db
