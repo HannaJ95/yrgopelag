@@ -1,1 +1,46 @@
 /* In this file you can add your custom styles. */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/**** BACKGROUND ****/
+body {
+    background-image: url("/assets/images/regnskog.png");
+}
+
+
+
+/* CARDS */
+.card_container {
+    width: 100vw;
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.card {
+    color: white;
+    min-width: fit-content;
+    min-height: fit-content;
+    backdrop-filter: blur(10px);
+    border: 1px solid white;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.card_img-holder {
+    margin: 1rem 10%;
+    aspect-ratio: 1/1;
+    background-color: white;
+}
+
+/*** BOOKING ***/
+.booking_container {
+  backdrop-filter: blur(10px);
+  border: 1px solid white;
+  padding: 20px;
+  margin: 10%;
+  color: white;
+}
