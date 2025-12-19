@@ -51,7 +51,7 @@ $features = getActiveFeatures($database);
             <label for="feature">Features</label>
                 <?php foreach ($features as $feature) : ?>
                     <div>
-                        <input type="checkbox" id="feature-<?= $feature['id'] ?>" name="feature[]" value="<?= $feature['id'] ?>">
+                        <input type="checkbox" id="feature-<?= $feature['id'] ?>" name="features[]" value="<?= $feature['id'] ?>">
                         <label for="feature-<?= $feature['id'] ?>"><?= $feature['name'] ?></label>
                     </div>
                 <?php endforeach ?>
