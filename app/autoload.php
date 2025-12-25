@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+// Load .env file
+require __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->load();
+
 // Start the session engines.
 session_start();
 
