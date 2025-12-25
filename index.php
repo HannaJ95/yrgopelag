@@ -22,13 +22,30 @@ $features = getActiveFeatures($database);
         <?php foreach ($rooms as $room) : ?>
 
             <div class="card">
-                <h1 class="card_h1"><?= $room['name'] ?></h1>
+                <h1 class="card_h1"><?= $room['name']?></h1>
                 <h2 class="card_h2"><?= $room['category'] ?></h2>
                 <div class="card_img-holder">
                     <img class="card_img">
                 </div>
                 <p><?= $room['price'] ?></p>
-                <div class="card_calendar"></div>
+                <div class="card_calendar">
+
+
+                    <section class="calendar">
+                        <?php
+                        $booked = getBookedDaysForRoom($database, $room['id']);
+                        for ($i = 1; $i <= 31; $i++) :
+                            if (in_array($i, $booked)){
+                                ?><div class="day booked"><?= $i; ?></div><?php
+                            } else if (($i % 7) === 0 || ($i % 7) === 6) {
+                                ?><div class="day weekend"><?= $i; ?></div><?php
+                            }
+                            else {
+                                ?><div class="day"><?= $i; ?></div><?php
+                            }     
+                        endfor;?>
+                    </section>
+                </div>
                 
                 
             </div>
