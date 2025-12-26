@@ -38,8 +38,8 @@ function getGuest(PDO $database, $name): array
 //*** SAVE BOOKING IN DATABASE ***//
 
 //*** CHECK if booking is not set ***//
-if (!isset($_POST['name'], $_POST['room_id'], $_POST['arrival'], $_POST['departure'])) {
-    $_SESSION['error'] = "You need to enter your name, room, arrival and departure";
+if (empty($_POST['name']) || empty($_POST['transfercode']) || empty($_POST['arrival']) || empty($_POST['departure'])) {
+    $_SESSION['error'] = "You need to fill in all fields";
     header('Location: /index.php');
     exit;
 }
@@ -122,12 +122,14 @@ if (!empty($features_id)) {
 
 $total_cost = $room_cost + $features_cost;
 
+// Create client for API requests
+$client = new Client(['base_uri' => $config['centralbank_api']]);
+
 
 
 //*** 3. CHECK IF TRANSFERCODE IS VALID - IF TRUE CONTINUE WITH BOOKING ***//
 $success = null;
 try {
-    $client = new Client(['base_uri' => $config['centralbank_api']]);
 
     $response = $client->request('POST', 'transferCode', [
         'json' => [
@@ -141,13 +143,23 @@ try {
 
     $success = $response['status'];
 } catch (RequestException $e) {
-    $_SESSION['error'] = "The transfercode is not valid";
+
+    if ($e->hasResponse()) {
+
+        $error = json_decode($e->getResponse()->getBody()->getContents(), true);
+        $_SESSION['error'] = $error['error'] ?? "The transfercode is not valid";
+
+    } else {
+        $_SESSION['error'] = "The transfercode is not valid";    
+    }
+
     header('Location: /index.php');
     exit;
 }
 
+
 if ($success != 'success') {
-    $_SESSION['error'] = "The room is not available";
+    $_SESSION['error'] = "The transfercode is not valid";
     header('Location: /index.php');
     exit;
 }
@@ -169,7 +181,6 @@ if (!empty($features_id)) {
 
 //try to send receipt to centralbanken
 try {
-    $client = new Client(['base_uri' => $config['centralbank_api']]);
 
     $response = $client->request('POST', 'receipt', [
         'json' => [
@@ -201,7 +212,7 @@ try {
 }
 
 if (!str_contains($receipt_response['status'], "success")) {
-    $_SESSION['error'] = "Receipt was not accepted by Central Bank";
+    $_SESSION['error'] = $receipt_response['error'] ?? "Receipt was not accepted by Central Bank";
     header('Location: /index.php');
     exit;
 }
@@ -242,7 +253,6 @@ if (!empty($features_id)) {
 //*** 7. DEPOSIT-REQUEST - GET MONEY FROM GUEST ***/
 
 try {
-    $client = new Client(['base_uri' => $config['centralbank_api']]);
 
     $response = $client->request('POST', 'deposit', [
         'json' => [
@@ -257,7 +267,7 @@ try {
     if ($e->hasResponse()) {
 
         $error = json_decode($e->getResponse()->getBody()->getContents(), true);
-        $_SESSION['error'] = $error['error'] ?? "Could not be deposit";
+        $_SESSION['error'] = $error['error'] ?? "Could not process deposit";
 
     } else {
         $_SESSION['error'] = "Could not connect to Central Bank";    
@@ -268,7 +278,7 @@ try {
 }
 
 if (!str_contains($deposit_response['status'], "success")) {
-    $_SESSION['error'] = "Deposit was not accepted by Central Bank";
+    $_SESSION['error'] = $deposit_response['error'] ?? "Deposit was not accepted by Central Bank";
     header('Location: /index.php');
     exit;
 
