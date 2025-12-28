@@ -11,8 +11,7 @@ function getAllRooms(PDO $database): array
 
 function getActiveFeatures(PDO $database): array
 {
-    //TODO: LÄGG TILL CHECK OM DEN ÄR ACTIVE ELLER EJ///////////////////////////////
-    $statement = $database->prepare('SELECT * FROM features');
+    $statement = $database->prepare('SELECT * FROM features WHERE active = 1');
     $statement->execute();
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
