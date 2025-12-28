@@ -35,10 +35,10 @@ function getGuest(PDO $database, $name): array
 }
 
 
-//*** SAVE BOOKING IN DATABASE ***//
+//*** CREATE BOOKING ***//
 
 //*** CHECK if booking is not set ***//
-if (empty($_POST['name']) || empty($_POST['transfercode']) || empty($_POST['arrival']) || empty($_POST['departure'])) {
+if (empty($_POST['name']) || empty($_POST['api_key']) || empty($_POST['arrival']) || empty($_POST['departure'])) {
     $_SESSION['error'] = "You need to fill in all fields";
     header('Location: /index.php');
     exit;
@@ -49,7 +49,7 @@ $name = trim(htmlspecialchars($_POST['name']));
 $room_id = (int)htmlspecialchars($_POST['room_id']);
 $arrival = htmlspecialchars($_POST['arrival']);
 $departure = htmlspecialchars($_POST['departure']);
-$transfercode = htmlspecialchars($_POST['transfercode']);
+$guest_api_key = htmlspecialchars($_POST['api_key']);
 
 
 //*** CHECK IF DEPARTURE IS BEFORE ARRIVAL ***//
@@ -127,7 +127,57 @@ $client = new Client(['base_uri' => $config['centralbank_api']]);
 
 
 
-//*** 3. CHECK IF TRANSFERCODE IS VALID - IF TRUE CONTINUE WITH BOOKING ***//
+
+
+//*** 3. CREATE TRANSFERCODE FOR GUEST (WITHDRAW) ***/
+
+try {
+
+    $response = $client->request('POST', 'withdraw', [
+        'json' => [
+            'user' => $name,
+            'api_key' => $guest_api_key,
+            'amount' => $total_cost
+        ]
+    ]);
+
+    $response = $response->getBody()->getContents();
+    $response = json_decode($response, true);
+
+    $status = $response['status'];
+
+
+} catch (RequestException $e) {
+
+    if ($e->hasResponse()) {
+
+        $error = json_decode($e->getResponse()->getBody()->getContents(), true);
+        $_SESSION['error'] = $error['error'] ?? "The transfercode is not valid";
+
+    } else {
+        $_SESSION['error'] = "The transfercode is not valid";
+    }
+
+    header('Location: /index.php');
+    exit;
+}
+
+
+if ($status != 'success') {
+    $_SESSION['error'] = "The transfercode is not valid";
+    header('Location: /index.php');
+    exit;
+}
+
+$transfercode = $response['transferCode'];
+
+
+
+
+
+
+
+//*** 4. CHECK IF TRANSFERCODE IS VALID - IF TRUE CONTINUE WITH BOOKING (TRANSFERCODE) ***//
 $success = null;
 try {
 
@@ -165,7 +215,7 @@ if ($success != 'success') {
 }
 
 
-//*** 4. SEND RECEIPT TO CENTRALBANK ***//
+//*** 5. SEND RECEIPT TO CENTRALBANK (RECEIPT) ***//
 
 //get the featureslist with names and tiers for receipt
 $features_for_receipt = [];
@@ -219,7 +269,7 @@ if (!str_contains($receipt_response['status'], "success")) {
 
 
 
-//**** 5. INSER BOOKING-DATA INTO BOOKINGS TABLE ***//
+//**** 6. INSER BOOKING-DATA INTO BOOKINGS TABLE ***//
 
 $query_insert_booking = 'INSERT INTO bookings (guest_id, room_id, arrival_date, departure_date, total_cost, transfer_code) VALUES (:guest_id, :room_id, :arrival_date, :departure_date, :total_cost, :transfer_code)';
 
@@ -236,7 +286,7 @@ $statement->execute([
 $booking_id = $database->lastInsertId();
 
 
-//*** 6. INSERT FEATURES-DATA INTO BOOKINGS_FEATURES TABLE IF FEATURES BOOKED ***//
+//*** 7. INSERT FEATURES-DATA INTO BOOKINGS_FEATURES TABLE IF FEATURES BOOKED ***//
 
 if (!empty($features_id)) {
 
@@ -250,7 +300,7 @@ if (!empty($features_id)) {
 }
 
 
-//*** 7. DEPOSIT-REQUEST - GET MONEY FROM GUEST ***/
+//*** 8. DEPOSIT-REQUEST - GET MONEY FROM GUEST (DEPOSIT) ***/
 
 try {
 
