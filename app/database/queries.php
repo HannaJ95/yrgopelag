@@ -42,3 +42,29 @@ function getBookedDaysForRoom(PDO $database, int $room_id): array
     
     return $booked_days;
 }
+
+function getActivePackageOffer(PDO $database) : array {
+
+    $stmt = $database->prepare("
+        SELECT 
+            p.id as package_id,
+            p.name as package_name,
+            p.room_id,
+            p.price as package_price,
+            p.active,
+            p.number_of_nights as nights,
+            r.name as room_name,
+            r.category as room_category,
+            GROUP_CONCAT(f.name) as feature_names,
+            COUNT(f.name) as count_activities
+        FROM packages p
+        JOIN rooms r ON p.room_id = r.id
+        LEFT JOIN packages_features pf ON p.id = pf.package_id
+        LEFT JOIN features f ON pf.feature_id = f.id
+        WHERE p.active = 1
+        GROUP BY p.id
+    ");
+
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
