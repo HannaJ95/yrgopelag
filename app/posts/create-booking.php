@@ -35,6 +35,48 @@ function getGuest(PDO $database, $name): array
 }
 
 
+function checkPackagePrice(PDO $database, int $room_id, array $feature_ids, int $nights): ?int
+{
+    if (empty($feature_ids)) {
+        return null;
+    }
+
+    // check if package exist with chosen options from guest
+    $statement = $database->prepare("
+        SELECT p.id, p.price, p.number_of_nights
+        FROM packages p
+        WHERE p.room_id = ?
+        AND p.active = 1
+        AND p.number_of_nights = ?
+    ");
+    $statement->execute([$room_id, $nights]);
+    $package = $statement->fetch();
+
+    if (!$package) {
+        return null;
+    }
+
+    // get wich features are included
+    $statement = $database->prepare("
+        SELECT feature_id
+        FROM packages_features
+        WHERE package_id = ?
+    ");
+    $statement->execute([$package['id']]);
+    $package_features = $statement->fetchAll(PDO::FETCH_COLUMN);
+
+    // check if chosen options matches
+    sort($feature_ids);
+    sort($package_features);
+
+    if ($feature_ids === $package_features) {
+        return $package['price'];
+    }
+
+    return null;
+}
+
+
 //*** CREATE BOOKING ***//
 
 //*** CHECK if booking is not set ***//
@@ -45,7 +87,7 @@ if (empty($_POST['name']) || empty($_POST['api_key']) || empty($_POST['arrival']
 }
 
 //*** COLLECT POST INPUT-DATA ***//
-$name = trim(htmlspecialchars($_POST['name']));
+$name = ucwords(trim(htmlspecialchars($_POST['name'])));
 $room_id = (int)htmlspecialchars($_POST['room_id']);
 $arrival = htmlspecialchars($_POST['arrival']);
 $departure = htmlspecialchars($_POST['departure']);
@@ -91,22 +133,18 @@ if (isset($result['count']) && $result['count'] != 0) {
 }
 
 //*** 2. GET TOTAL PRICE FOR BOOKING ***//
-$guest = getGuest($database, $name);
 
 //get total price for booked room
-$nights = (strtotime($departure) - strtotime($arrival)) / (60 * 60 * 24);
+$nights = (new DateTime($arrival))->diff(new DateTime($departure))->days;
 $statement = $database->prepare('SELECT price from rooms where id = :room_id');
 $statement->execute(['room_id' => $room_id]);
 $room = $statement->fetch(PDO::FETCH_ASSOC);
 $room_cost = $room['price'] * $nights;
-$user = $config['user'];
-$api_key = $_ENV['API_KEY'];
 
 //check if features is booked and get totalprice
 $features_id = [];
 if (isset($_POST['features'])) {
-
-    $features_id = $_POST['features'];
+    $features_id = array_map('intval', $_POST['features']);
 }
 
 $features_cost = 0;
@@ -120,12 +158,38 @@ if (!empty($features_id)) {
     $features_cost = $result['total'] ?? 0;
 }
 
-$total_cost = $room_cost + $features_cost;
+
+// *** KOLLA OM DET FINNS ETT PAKET ***//
+$package_price = checkPackagePrice($database, $room_id, $features_id, $nights);
+
+if ($package_price !== null) {
+    $total_cost = $package_price;
+
+} else {
+    $total_cost = $room_cost + $features_cost;
+}
+
+
+//*** IF GUEST BOOKED MULTIPLE TIMES - GIVE A DISCOUNT ON TOTAL PRICE ***//
+$discount_multiplier = 0.9;
+
+$statement = $database->prepare('SELECT COUNT(*) as count 
+        FROM bookings b
+        JOIN guests g ON b.guest_id = g.id
+        WHERE g.name = :name');
+$statement->execute(['name' => $name]);
+
+$result = $statement->fetch();
+$number_of_bookings = $result['count'];
+
+if (isset($result['count']) && $result['count'] != 0) {
+    $total_cost = round($total_cost * $discount_multiplier);
+}
+
+
 
 // Create client for API requests
 $client = new Client(['base_uri' => $config['centralbank_api']]);
-
-
 
 
 
@@ -170,10 +234,6 @@ if ($status != 'success') {
 }
 
 $transfercode = $response['transferCode'];
-
-
-
-
 
 
 
@@ -272,6 +332,8 @@ if (!str_contains($receipt_response['status'], "success")) {
 //**** 6. INSER BOOKING-DATA INTO BOOKINGS TABLE ***//
 
 $query_insert_booking = 'INSERT INTO bookings (guest_id, room_id, arrival_date, departure_date, total_cost, transfer_code) VALUES (:guest_id, :room_id, :arrival_date, :departure_date, :total_cost, :transfer_code)';
+
+$guest = getGuest($database, $name);
 
 $statement = $database->prepare($query_insert_booking);
 $statement->execute([
