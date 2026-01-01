@@ -6,5 +6,7 @@ return [
     'database_path' => sprintf('sqlite:%s/database/database.db', __DIR__),
     'centralbank_api' => ('https://www.yrgopelag.se/centralbank/'),
     'user' => 'Hanna',
-    'calendar_days' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    'calendar_days' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    'base_url' => '/yrgopelag',
+    'hotel_name' => "LOST ISLAND HOTEL"
 ];
