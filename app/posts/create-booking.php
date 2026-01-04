@@ -3,7 +3,7 @@
 declare(strict_types=1);
 require __DIR__ . '/../autoload.php';
 
-use GuzzleHttp\Client;
+// use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 
 
@@ -82,7 +82,7 @@ function checkPackagePrice(PDO $database, int $room_id, array $feature_ids, int 
 //*** CHECK if booking is not set ***//
 if (empty($_POST['name']) || empty($_POST['api_key']) || empty($_POST['arrival']) || empty($_POST['departure'])) {
     $_SESSION['error'] = "You need to fill in all fields";
-    header('Location: /index.php');
+    redirect('/index.php');
     exit;
 }
 
@@ -97,7 +97,7 @@ $guest_api_key = htmlspecialchars($_POST['api_key']);
 //*** CHECK IF DEPARTURE IS BEFORE ARRIVAL ***//
 if ($departure <= $arrival) {
     $_SESSION['error'] = "Departure must be after arrival";
-    header('Location: /index.php');
+    redirect('/index.php');
     exit;
 }
 
@@ -185,13 +185,6 @@ $number_of_bookings = $result['count'];
 if (isset($result['count']) && $result['count'] != 0) {
     $total_cost = round($total_cost * $discount_multiplier);
 }
-
-
-
-// Create client for API requests
-$client = new Client(['base_uri' => $config['centralbank_api']]);
-
-
 
 //*** 3. CREATE TRANSFERCODE FOR GUEST (WITHDRAW) ***/
 
