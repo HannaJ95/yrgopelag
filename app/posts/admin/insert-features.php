@@ -37,7 +37,6 @@ $stmt = $database->query('SELECT activities, tier, name FROM features');
 $current_features = $stmt->fetchAll();
 
 // make features array
-//TODO:: KOLLA OM DET ÄR SAMMA/liknande SOM SKICKAS TILL RECEIPT? GÖR FUNKTION???
 $features_for_api = [];
 foreach ($current_features as $f) {
     if (!isset($features_for_api[$f['activities']])) {
@@ -66,29 +65,34 @@ try {
             'features' => $features_for_api
         ]
     ]);
-    
-    $result = json_decode($response->getBody()->getContents(), true);
-    
-    // IF OK INSERT INTO DATABASE
-    $stmt = $database->prepare('
-        INSERT INTO features (name, activities, tier, price) 
-        VALUES (:name, :activities, :tier, :price)
-    ');
 
-    $stmt->execute([
-        ':name' => $name,
-        ':activities' => $activity,
-        ':tier' => $tier,
-        ':price' => $price
-    ]);
-    
+    $result = json_decode($response->getBody()->getContents(), true);
 } catch (RequestException $e) {
-    
+
     if ($e->hasResponse()) {
         $error = json_decode($e->getResponse()->getBody()->getContents(), true);
         $_SESSION['error'] = $error['error'];
     }
+
+    redirect('/admin/index.php');
 }
 
+if ($result["charged"] === 0) {
+    redirect('/admin/index.php');
+}
+
+
+// INSERT INTO DATABASE
+$stmt = $database->prepare('
+    INSERT INTO features (name, activities, tier, price) 
+    VALUES (:name, :activities, :tier, :price)
+');
+
+$stmt->execute([
+    ':name' => $name,
+    ':activities' => $activity,
+    ':tier' => $tier,
+    ':price' => $price
+]);
+
 redirect('/admin/index.php');
-exit;
