@@ -39,7 +39,7 @@ function formatFeaturesList($featureNames): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOST HOTEL</title>
-    <link rel="stylesheet" href="/assets/styles/app.css">
+    <link rel="stylesheet" href="assets/styles/app.css">
 </head>
 <body>
 
@@ -153,7 +153,7 @@ function formatFeaturesList($featureNames): string
             <select name="room_id" id="room-select">
                 <?php foreach ($rooms as $room) : ?>
                     <option value="<?= $room['id'] ?>" data-price="<?= $room['price'] ?>">
-                        <?= $room['category'] ?> (<?= $room['price'] ?> credits/night)
+                        <?= $room['name'] ?> - <?= $room['category'] ?> (<?= $room['price'] ?> credits/night)
                     </option>
                 <?php endforeach ?>
             </select>
@@ -181,7 +181,7 @@ function formatFeaturesList($featureNames): string
             />
 
             <!-- display updated price from choices -->
-            <p><strong>Total Price: <span id="total-price">0</span> credits</strong></p>
+            <p><strong>Total Price: <span id="total-price">0</span> Dharma beers</strong></p>
 
             <button type="submit" class="btn">BOOK</button>
         </form>
