@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+
 // Load .env file
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -17,6 +20,7 @@ date_default_timezone_set('UTC');
 // Set the default character encoding to UTF-8.
 mb_internal_encoding('UTF-8');
 
+
 // Include the helper functions.
 require __DIR__ . '/functions.php';
 
@@ -25,6 +29,9 @@ $config = require __DIR__ . '/config.php';
 
 // Setup the database connection.
 $database = new PDO($config['database_path']);
+
+// Create client for API requests
+$client = new Client(['base_uri' => $config['centralbank_api']]);
 
 // Include database queries
 require __DIR__ . '/database/queries.php';
