@@ -39,7 +39,7 @@ function formatFeaturesList($featureNames): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOST HOTEL</title>
-    <link rel="stylesheet" href="assets/styles/app.css">
+    <link rel="stylesheet" href="<?= $config['assets']['css']; ?>">
 </head>
 <body>
 
@@ -122,7 +122,7 @@ function formatFeaturesList($featureNames): string
         <?php endif; ?>
 
 
-        <form class="booking" action="app/posts/create-booking.php" method="post">
+        <form class="booking" action="<?= $config['paths']['posts']['create_booking']; ?>" method="post">
 
             <!-- ask for guestname -->
             <label for="name">Your name:</label>

@@ -5,13 +5,11 @@ declare(strict_types=1);
 require __DIR__ . '/../../autoload.php';
 
 if (!isset($_SESSION['user'])) {
-    header('Location: /admin/login.php');
-    exit;
+    redirect($config['paths']['admin']['login']);
 }
 
 if (!isset($_POST['name'], $_POST['room_id'], $_POST['price'], $_POST['number_of_nights'], $_POST['features'])) {
-    header('Location: /admin/index.php');
-    exit;
+    redirect($config['paths']['admin']['index']);
 }
 
 //TODO: IF EMPTY - kolla det också??!!
@@ -46,5 +44,4 @@ foreach ($_POST['features'] as $feature_id) {
     ]);
 }
 
-redirect('/admin/index.php');
-exit;
+redirect($config['paths']['admin']['index']);

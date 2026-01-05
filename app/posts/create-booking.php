@@ -82,8 +82,7 @@ function checkPackagePrice(PDO $database, int $room_id, array $feature_ids, int 
 //*** CHECK if booking is not set ***//
 if (empty($_POST['name']) || empty($_POST['api_key']) || empty($_POST['arrival']) || empty($_POST['departure'])) {
     $_SESSION['error'] = "You need to fill in all fields";
-    redirect('/index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 //*** COLLECT POST INPUT-DATA ***//
@@ -97,8 +96,7 @@ $guest_api_key = htmlspecialchars($_POST['api_key']);
 //*** CHECK IF DEPARTURE IS BEFORE ARRIVAL ***//
 if ($departure <= $arrival) {
     $_SESSION['error'] = "Departure must be after arrival";
-    redirect('/index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 
@@ -128,8 +126,7 @@ $result = $statement->fetch();
 //check if result is not 0 - then it is not available
 if (isset($result['count']) && $result['count'] != 0) {
     $_SESSION['error'] = "The room is not available";
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 //*** 2. GET TOTAL PRICE FOR BOOKING ***//
@@ -215,15 +212,14 @@ try {
         $_SESSION['error'] = "The transfercode is not valid";
     }
 
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
+
 }
 
 
 if ($status != 'success') {
     $_SESSION['error'] = "The transfercode is not valid";
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 $transfercode = $response['transferCode'];
@@ -253,18 +249,16 @@ try {
         $_SESSION['error'] = $error['error'] ?? "The transfercode is not valid";
 
     } else {
-        $_SESSION['error'] = "The transfercode is not valid";    
+        $_SESSION['error'] = "The transfercode is not valid";
     }
 
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 
 if ($success != 'success') {
     $_SESSION['error'] = "The transfercode is not valid";
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 
@@ -307,17 +301,15 @@ try {
         $_SESSION['error'] = $error['error'] ?? "Could not send receipt to Central Bank";
 
     } else {
-        $_SESSION['error'] = "Could not connect to Central Bank";    
+        $_SESSION['error'] = "Could not connect to Central Bank";
     }
 
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 if (!str_contains($receipt_response['status'], "success")) {
     $_SESSION['error'] = $receipt_response['error'] ?? "Receipt was not accepted by Central Bank";
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 
@@ -375,19 +367,15 @@ try {
         $_SESSION['error'] = $error['error'] ?? "Could not process deposit";
 
     } else {
-        $_SESSION['error'] = "Could not connect to Central Bank";    
+        $_SESSION['error'] = "Could not connect to Central Bank";
     }
 
-    header('Location: /index.php');
-    exit;
+    redirect($config['paths']['index']);
 }
 
 if (!str_contains($deposit_response['status'], "success")) {
     $_SESSION['error'] = $deposit_response['error'] ?? "Deposit was not accepted by Central Bank";
-    header('Location: /index.php');
-    exit;
-
-
+    redirect($config['paths']['index']);
 }
 
 
@@ -406,5 +394,4 @@ $_SESSION['receipt'] = [
 
 //när bokningen är lyckad, skriv ut kvitto
 $_SESSION['success'] = "Booking successful!";
-header('Location: /receipt.php');
-exit;
+redirect($config['paths']['receipt']);

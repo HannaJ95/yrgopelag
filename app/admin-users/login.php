@@ -17,7 +17,7 @@ if (isset($_POST['email'], $_POST['password'])) {
     // if admin-user don't exist, svare error in $_SESSION
     if (!$user) {
         $_SESSION['admin']['error'] = "User does not exist please try again";
-        redirect('/admin/index.php');
+        redirect($config['paths']['admin']['index']);
 
     }
 
@@ -32,4 +32,4 @@ if (isset($_POST['email'], $_POST['password'])) {
     }
 }
 
-redirect('/admin/index.php');
+redirect($config['paths']['admin']['index']);

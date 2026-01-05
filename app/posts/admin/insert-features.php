@@ -7,13 +7,11 @@ require __DIR__ . '/../../autoload.php';
 use GuzzleHttp\Exception\RequestException;
 
 if (!isset($_SESSION['user'])) {
-    redirect('/admin/login.php');
-    exit;
+    redirect($config['paths']['admin']['login']);
 }
 
 if (!isset($_POST['name'], $_POST['activities'], $_POST['tier'], $_POST['price'])) {
-    redirect('/admin/index.php');
-    exit;
+    redirect($config['paths']['admin']['index']);
 }
 
 // form data
@@ -25,8 +23,7 @@ $price = (int) $_POST['price'];
 // check if empty
 if (empty($name) || empty($activity) || empty($tier) || $price < 0) {
     $_SESSION['error'] = "All fields are required";
-    redirect('/admin/index.php');
-    exit;
+    redirect($config['paths']['admin']['index']);
 }
 
 // get neede info from hotel_settings
@@ -74,11 +71,11 @@ try {
         $_SESSION['error'] = $error['error'];
     }
 
-    redirect('/admin/index.php');
+    redirect($config['paths']['admin']['index']);
 }
 
 if ($result["charged"] === 0) {
-    redirect('/admin/index.php');
+    redirect($config['paths']['admin']['index']);
 }
 
 
@@ -95,4 +92,4 @@ $stmt->execute([
     ':price' => $price
 ]);
 
-redirect('/admin/index.php');
+redirect($config['paths']['admin']['index']);

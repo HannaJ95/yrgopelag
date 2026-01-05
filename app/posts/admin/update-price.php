@@ -5,7 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../../autoload.php';
 
 if (!isset($_SESSION['user'])) {
-    redirect('/admin/index.php');
+    redirect($config['paths']['admin']['index']);
 }
 
 if (isset($_POST['feature_id'], $_POST['price'])) {
@@ -19,8 +19,7 @@ if (isset($_POST['feature_id'], $_POST['price'])) {
     $table = 'rooms';
 
 } else {
-    redirect('/admin/index.php');
-    exit;
+    redirect($config['paths']['admin']['index']);
 }
 
 $stmt = $database->prepare("UPDATE $table SET price = :price WHERE id = :id");
@@ -30,5 +29,4 @@ $stmt->execute([
 ]);
 
 
-redirect('/admin/index.php');
-exit;
+redirect($config['paths']['admin']['index']);

@@ -105,7 +105,7 @@ foreach ($bookings as &$booking) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin</title>
-    <link rel="stylesheet" href="assets/styles/app.css">
+    <link rel="stylesheet" href="<?= $config['assets']['css']; ?>">
 
     <!-- TODO: FIX STYLES -->
     <style>
@@ -194,7 +194,7 @@ foreach ($bookings as &$booking) {
         <?php } ?>
 
         <!-- input fields for email and password -->
-        <form action="../app/admin-users/login.php" method="post">
+        <form action="<?= $config['paths']['posts']['admin']['login']; ?>" method="post">
             <div>
                 <label for="email" class="admin-visually-hidden">Email</label>
                 <input class="form-control" type="email" name="email" id="email" placeholder="E-mail" required>
@@ -262,7 +262,7 @@ foreach ($bookings as &$booking) {
                         <td><?= htmlspecialchars($feature['tier']) ?></td>
                         <td><?= $feature['price'] ?></td>
                         <td>
-                            <form method="POST" action="/app/posts/admin/update-price.php" style="display:inline;">
+                            <form method="POST" action="<?= $config['paths']['posts']['admin']['update_price']; ?>" style="display:inline;">
                                 <input type="hidden" name="feature_id" value="<?= $feature['id'] ?>">
                                 <input type="text" name="price">
                                 <button type="submit">OK</button>
@@ -271,7 +271,7 @@ foreach ($bookings as &$booking) {
                         </td>
                         <td><?= $feature['active'] ? '✅ Active' : '❌ Inactive' ?></td>
                         <td>
-                            <form method="POST" action="/app/posts/admin/toggle-active.php" style="display:inline;">
+                            <form method="POST" action="<?= $config['paths']['posts']['admin']['toggle_active']; ?>" style="display:inline;">
                                 <input type="hidden" name="feature_id" value="<?= $feature['id'] ?>">
                                 <button type="submit">Toggle</button>
                             </form>
@@ -280,7 +280,7 @@ foreach ($bookings as &$booking) {
                 <?php endforeach; ?>
                 <!--INSERT FEATURES FORM (BUY FROM CENTRALBANKEN)-->
                 <td><?= $feature['id'] + 1 ?></td>
-                <form method="POST" action="/app/posts/admin/insert-features.php">
+                <form method="POST" action="<?= $config['paths']['posts']['admin']['insert_features']; ?>">
                     <td><input type="text" name="name"></td>
                     <td><input type="text" name="activities"></td>
                     <td><input type="text" name="tier"></td>
@@ -314,7 +314,7 @@ foreach ($bookings as &$booking) {
                         <td><?= htmlspecialchars($room['category']) ?></td>
                         <td><?= htmlspecialchars($room['price']) ?></td>
                         <td>
-                            <form method="POST" action="/app/posts/admin/update-price.php" style="display:inline;">
+                            <form method="POST" action="<?= $config['paths']['posts']['admin']['update_price']; ?>" style="display:inline;">
                                 <input type="hidden" name="room_id" value="<?= $room['id'] ?>">
                                 <input type="text" name="price">
                                 <button type="submit">OK</button>
@@ -362,7 +362,7 @@ foreach ($bookings as &$booking) {
                         </td>
                         <td><?= $package['active'] ? '✅ Active' : '❌ Inactive' ?></td>
                         <td>
-                            <form method="POST" action="/app/posts/admin/toggle-active.php" style="display:inline;">
+                            <form method="POST" action="<?= $config['paths']['posts']['admin']['toggle_active']; ?>" style="display:inline;">
                                 <input type="hidden" name="package_id" value="<?= $package['id'] ?>">
                                 <button type="submit">Toggle</button>
                             </form>
@@ -373,7 +373,7 @@ foreach ($bookings as &$booking) {
                 <!-- INSERT PACKAGE ROW -->
                 <tr>
                     <td><?= $package['id'] + 1 ?></td>
-                    <form method="POST" action="/app/posts/admin/insert-package.php">
+                    <form method="POST" action="<?= $config['paths']['posts']['admin']['insert_package']; ?>">
                         <td><input type="text" name="name"></td>
                         <td><input type="text" name="room_id"></td>
                         <td><input type="text" name="price"></td>
