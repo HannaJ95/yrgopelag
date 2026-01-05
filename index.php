@@ -6,6 +6,17 @@ $rooms = getAllRooms($database);
 $features = getActiveFeatures($database);
 $offers = getActivePackageOffer($database);
 
+
+// Group feature after activity
+$grouped_features = [];
+foreach ($features as $feature) {
+    $activity = $feature['activities'];
+    if (!isset($grouped_features[$activity])) {
+        $grouped_features[$activity] = [];
+    }
+    $grouped_features[$activity][] = $feature;
+}
+
 //Get list 
 function formatFeaturesList($featureNames): string
 {
@@ -42,6 +53,8 @@ function formatFeaturesList($featureNames): string
     <link rel="stylesheet" href="<?= $config['assets']['css']; ?>">
 </head>
 <body>
+
+    <?php require __DIR__ . '/views/header.php'; ?>
 
     <!--**** ROOM SECTION ****-->
     <section class="card_container">
@@ -134,19 +147,26 @@ function formatFeaturesList($featureNames): string
             
             <!-- print features-list -->
             <p class="features-heading"><strong>Features</strong></p>
-                <?php foreach ($features as $feature) : ?>
+
+            <?php foreach ($grouped_features as $activity => $features_in_group) : ?>
+
+                <h3><?= ucfirst($activity) ?></h3>
+
+                <!-- Show features in it's category -->
+                <?php foreach ($features_in_group as $feature) : ?>
                     <div>
-                        <input type="checkbox" 
-                               id="feature-<?= $feature['id'] ?>" 
-                               name="features[]" 
-                               value="<?= $feature['id'] ?>"
-                               data-price="<?= $feature['price'] ?>"
-                               class="feature-checkbox">
+                        <input type="checkbox"
+                            id="feature-<?= $feature['id'] ?>"
+                            name="features[]"
+                            value="<?= $feature['id'] ?>"
+                            data-price="<?= $feature['price'] ?>"
+                            class="feature-checkbox">
                         <label for="feature-<?= $feature['id'] ?>">
                             <?= $feature['name'] ?> (<?= $feature['price'] ?> credits)
                         </label>
                     </div>
                 <?php endforeach ?>
+            <?php endforeach ?>
 
             <!-- room dropdown -->
             <label for="room-select">Pick room</label>
