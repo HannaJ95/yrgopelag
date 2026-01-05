@@ -149,7 +149,7 @@ function formatFeaturesList($featureNames): string
                 <?php endforeach ?>
 
             <!-- room dropdown -->
-            <label for="room_id">Pick room</label>
+            <label for="room-select">Pick room</label>
             <select name="room_id" id="room-select">
                 <?php foreach ($rooms as $room) : ?>
                     <option value="<?= $room['id'] ?>" data-price="<?= $room['price'] ?>">
