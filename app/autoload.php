@@ -29,6 +29,7 @@ $config = require __DIR__ . '/config.php';
 
 // Setup the database connection.
 $database = new PDO($config['database_path']);
+$database->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 // Create client for API requests
 $client = new Client(['base_uri' => $config['centralbank_api']]);
