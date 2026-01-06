@@ -5,6 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../../autoload.php';
 
 if (!isset($_SESSION['user'])) {
+    $_SESSION['admin']['error'] = "You must be logged in to access this page";
     redirect($config['paths']['admin']['index']);
 }
 
@@ -24,9 +25,10 @@ if (isset($_POST['feature_id'], $_POST['price'])) {
 
 $stmt = $database->prepare("UPDATE $table SET price = :price WHERE id = :id");
 $stmt->execute([
-    ':price' => $price,
-    ':id' => $id
+    'price' => $price,
+    'id' => $id
 ]);
 
+$_SESSION['admin']['success'] = "Successfully updated price";
 
 redirect($config['paths']['admin']['index']);
