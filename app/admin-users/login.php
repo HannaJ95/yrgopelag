@@ -12,7 +12,7 @@ if (isset($_POST['email'], $_POST['password'])) {
     $statement->bindParam(':email', $email, PDO::PARAM_STR);
     $statement->execute();
 
-    $user = $statement->fetch(PDO::FETCH_ASSOC);
+    $user = $statement->fetch();
 
     // if admin-user don't exist, svare error in $_SESSION
     if (!$user) {
