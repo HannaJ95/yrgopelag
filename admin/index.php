@@ -16,7 +16,13 @@ try {
     $response = $response->getBody()->getContents();
     $islandFeatures = json_decode($response, true);
 } catch (RequestException $e) {
-    $e->getMessage();
+    if ($e->hasResponse()) {
+        $error = json_decode($e->getResponse()->getBody()->getContents(), true);
+        $_SESSION['admin']['error'] = $error['error'] ?? "Failed to load island features: " . $e->getMessage();
+    } else {
+        $_SESSION['admin']['error'] = "Failed to connect to Central Bank: " . $e->getMessage();
+    }
+    $islandFeatures = ['features' => []];
 }
 
 
@@ -32,20 +38,26 @@ try {
     $response = $response->getBody()->getContents();
     $accountInfo = json_decode($response, true);
 } catch (RequestException $e) {
-    $e->getMessage();
+    if ($e->hasResponse()) {
+        $error = json_decode($e->getResponse()->getBody()->getContents(), true);
+        $_SESSION['admin']['error'] = $error['error'] ?? "Failed to load account info: " . $e->getMessage();
+    } else {
+        $_SESSION['admin']['error'] = "Failed to connect to Central Bank: " . $e->getMessage();
+    }
+    $accountInfo = ['credit' => 0];
 }
 
 // get features table
 $stmt = $database->query('SELECT * FROM features');
-$features = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$features = $stmt->fetchAll();
 
 // get rooms table
 $stmt = $database->query('SELECT * FROM rooms');
-$rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$rooms = $stmt->fetchAll();
 
 // get package table with booked features
 $stmt = $database->query('SELECT * FROM packages');
-$packages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$packages = $stmt->fetchAll();
 
 function getPackageFeatures(PDO $database, $package_id): array
 {
@@ -63,7 +75,7 @@ function getPackageFeatures(PDO $database, $package_id): array
     ");
 
     $stmt->execute([':package_id' => $package_id]);
-    $features = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $features = $stmt->fetchAll();
 
     return $features;
 }
@@ -106,64 +118,6 @@ foreach ($bookings as &$booking) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin</title>
     <link rel="stylesheet" href="<?= $config['assets']['css']; ?>">
-
-    <!-- TODO: FIX STYLES -->
-    <style>
-        .admin-nav {
-            width: 100vw;
-            height: 2rem;
-            text-align: end;
-            padding-right: 2rem;
-        }
-
-        .admin-header {
-            text-align: center;
-        }
-
-        .admin-admin {
-            text-align: center;
-            margin: 2rem;
-        }
-
-        .admin_text-signin {
-            padding: 1rem 0rem;
-        }
-
-        .admin-visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-        }
-
-
-        /* TABLES */
-        table {
-            width: fit-content;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background: #333;
-            color: white;
-        }
-
-        h2 {
-            margin-top: 2rem;
-        }
-
-        li {
-            list-style: none;
-        }
-    </style>
 </head>
 
 <body>
@@ -213,6 +167,23 @@ foreach ($bookings as &$booking) {
     <!-- WHEN LOGGED IN -->
     <?php if (isset($_SESSION['user'])) : ?>
         <p>Welcome, <?php echo $_SESSION['user']['name']; ?>!</p>
+
+        <!-- ADMIN NOTIFICATIONS -->
+        <?php if (isset($_SESSION['admin']['error'])): ?>
+            <div class="admin-notification error" id="notification">
+                <span><?= htmlspecialchars($_SESSION['admin']['error']) ?></span>
+                <button class="close-btn" onclick="closeNotification()">&times;</button>
+            </div>
+            <?php unset($_SESSION['admin']['error']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['admin']['success'])): ?>
+            <div class="admin-notification success" id="notification">
+                <span><?= htmlspecialchars($_SESSION['admin']['success']) ?></span>
+                <button class="close-btn" onclick="closeNotification()">&times;</button>
+            </div>
+            <?php unset($_SESSION['admin']['success']); ?>
+        <?php endif; ?>
 
         <!-- DISPLAY ACOUNT CREDITS -->
         <p>Credits: <?= $accountInfo['credit'] ?></p>
@@ -447,5 +418,28 @@ foreach ($bookings as &$booking) {
             </tbody>
         </table>
     <?php endif; ?>
+
+    <script>
+        function closeNotification() {
+            const notification = document.getElementById('notification');
+            if (notification) {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }
+        }
+
+        // Auto-hide notification after 3 seconds
+        window.addEventListener('DOMContentLoaded', () => {
+            const notification = document.getElementById('notification');
+            if (notification) {
+                setTimeout(() => {
+                    closeNotification();
+                }, 3000);
+            }
+        });
+    </script>
+    
 </body>
 </html>
