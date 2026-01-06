@@ -7,10 +7,12 @@ require __DIR__ . '/../../autoload.php';
 use GuzzleHttp\Exception\RequestException;
 
 if (!isset($_SESSION['user'])) {
+    $_SESSION['admin']['error'] = "You must be logged in to access this page";
     redirect($config['paths']['admin']['login']);
 }
 
 if (!isset($_POST['name'], $_POST['activities'], $_POST['tier'], $_POST['price'])) {
+    $_SESSION['admin']['error'] = "All fields are required";
     redirect($config['paths']['admin']['index']);
 }
 
@@ -22,7 +24,7 @@ $price = (int) $_POST['price'];
 
 // check if empty
 if (empty($name) || empty($activity) || empty($tier) || $price < 0) {
-    $_SESSION['error'] = "All fields are required";
+    $_SESSION['admin']['error'] = "All fields are required";
     redirect($config['paths']['admin']['index']);
 }
 
@@ -68,13 +70,14 @@ try {
 
     if ($e->hasResponse()) {
         $error = json_decode($e->getResponse()->getBody()->getContents(), true);
-        $_SESSION['error'] = $error['error'];
     }
-
+    
+    $_SESSION['admin']['error'] = $error['error'] ?? "Failed to connect to Centralbanken API";
     redirect($config['paths']['admin']['index']);
 }
 
 if ($result["charged"] === 0) {
+    $_SESSION['admin']['error'] = "Failed to charge feature";
     redirect($config['paths']['admin']['index']);
 }
 
@@ -86,10 +89,13 @@ $stmt = $database->prepare('
 ');
 
 $stmt->execute([
-    ':name' => $name,
-    ':activities' => $activity,
-    ':tier' => $tier,
-    ':price' => $price
+    'name' => $name,
+    'activities' => $activity,
+    'tier' => $tier,
+    'price' => $price
 ]);
+
+
+$_SESSION['admin']['success'] = "Successfully added feature";
 
 redirect($config['paths']['admin']['index']);
