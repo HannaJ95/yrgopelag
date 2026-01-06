@@ -4,7 +4,7 @@ require __DIR__ . '/../autoload.php';
 header('Content-Type: application/json');
 
 if (empty($_GET['name'])) {
-    echo json_encode(['discount' => 0]);
+    echo json_encode(['discount_multiplier' => 0, 'bookings_count' => 0]);
     exit;
 }
 
