@@ -30,6 +30,9 @@ return [
     ],
 
     'assets' => [
-        'css' => '/assets/styles/app.css'
+        'css' => '/assets/styles/app.css',
+        'images' => [
+            'rooms' => '/assets/images/rooms/'
+        ]
     ]
 ];
