@@ -6,14 +6,14 @@ function getAllRooms(PDO $database): array
 {
     $statement = $database->prepare('SELECT * FROM rooms');
     $statement->execute();
-    return $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $statement->fetchAll();
 }
 
 function getActiveFeatures(PDO $database): array
 {
     $statement = $database->prepare('SELECT * FROM features WHERE active = 1');
     $statement->execute();
-    return $statement->fetchAll(PDO::FETCH_ASSOC);
+    return $statement->fetchAll();
 }
 
 
@@ -66,5 +66,5 @@ function getActivePackageOffer(PDO $database) : array {
     ");
 
     $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    return $stmt->fetchAll();
 }

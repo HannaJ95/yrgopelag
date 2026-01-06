@@ -21,15 +21,15 @@ function getGuest(PDO $database, $name): array
     if (!$result) {
 
         $statement = $database->prepare('INSERT INTO guests (name) VALUES (:name)');
-        $statement->bindParam(':name', $name, PDO::PARAM_STR);
+        $statement->bindParam('name', $name, PDO::PARAM_STR);
         $statement->execute();
     }
 
     //Get guest id
     $statement = $database->prepare("SELECT id FROM guests WHERE name = :name");
-    $statement->bindParam(':name', $name, PDO::PARAM_STR);
+    $statement->bindParam('name', $name, PDO::PARAM_STR);
     $statement->execute();
-    $guest = $statement->fetch(PDO::FETCH_ASSOC);
+    $guest = $statement->fetch();
 
     return $guest;
 }
@@ -135,7 +135,7 @@ if (isset($result['count']) && $result['count'] != 0) {
 $nights = (new DateTime($arrival))->diff(new DateTime($departure))->days;
 $statement = $database->prepare('SELECT price from rooms where id = :room_id');
 $statement->execute(['room_id' => $room_id]);
-$room = $statement->fetch(PDO::FETCH_ASSOC);
+$room = $statement->fetch();
 $room_cost = $room['price'] * $nights;
 
 //check if features is booked and get totalprice
@@ -151,7 +151,7 @@ if (!empty($features_id)) {
 
     $statement = $database->prepare("SELECT SUM(price) as total FROM features WHERE id IN ($placeholders)");
     $statement->execute($features_id);
-    $result = $statement->fetch(PDO::FETCH_ASSOC);
+    $result = $statement->fetch();
     $features_cost = $result['total'] ?? 0;
 }
 
@@ -273,7 +273,7 @@ if (!empty($features_id)) {
     $statement = $database->prepare(" SELECT activities as activity, tier FROM features WHERE id IN ($placeholders)");
 
     $statement->execute($features_id);
-    $features_for_receipt = $statement->fetchAll(PDO::FETCH_ASSOC);
+    $features_for_receipt = $statement->fetchAll();
 }
 
 //try to send receipt to centralbanken
@@ -393,5 +393,6 @@ $_SESSION['receipt'] = [
 ];
 
 //när bokningen är lyckad, skriv ut kvitto
+
 $_SESSION['success'] = "Booking successful!";
 redirect($config['paths']['receipt']);
