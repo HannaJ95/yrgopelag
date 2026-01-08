@@ -11,23 +11,16 @@
         <?php unset($_SESSION['error']); ?>
     <?php endif; ?>
 
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="message success">
-            <?= htmlspecialchars($_SESSION['success']) ?>
-        </div>
-        <?php unset($_SESSION['success']); ?>
-    <?php endif; ?>
-
 
     <form class="booking" action="<?= $config['paths']['posts']['create_booking']; ?>" method="post">
 
         <!-- ask for guestname -->
         <label for="name">Your name:</label>
-        <input type="text" id="name" name="name" autocomplete="name"/>
+        <input type="text" id="name" name="name" autocomplete="off"/>
 
         <!-- ask for guest api-key-->
-        <label for="api_key">Api-key:</label>
-        <input type="text" id="api_key" name="api_key" autocomplete="name"/>
+        <label for="api_key">Api-key (for payment):</label>
+        <input type="text" id="api_key" name="api_key" autocomplete="off"/>
 
         <!-- print features-list -->
         <p class="features-heading"><strong>Features</strong></p>
@@ -96,6 +89,8 @@
 </section>
 
 <script>
+
+    const baseUrl = '<?= $config['base_url'] ?>';
     let currentDiscount = 0;
 
     async function checkDiscount() {
@@ -108,7 +103,7 @@
         }
 
         try {
-            const response = await fetch(`app/posts/check-discount.php?name=${encodeURIComponent(name)}`);
+                const response = await fetch(`${baseUrl}/app/posts/check-discount.php?name=${encodeURIComponent(name)}`);
             const data = await response.json();
             currentDiscount = data.discount_multiplier;
             updatePrice();
@@ -142,10 +137,8 @@
         let packagePrice = null;
         if (selectedFeatures.length > 0 && nights > 0) {
             try {
-                const response = await fetch(`app/posts/check-package.php?room_id=${roomId}&features=${selectedFeatures.join(',')}&nights=${nights}`);
-                const text = await response.text();
-                console.log('Raw response:', text);
-                const data = JSON.parse(text);
+                const response = await fetch(`${baseUrl}/app/posts/check-package.php?room_id=${roomId}&features=${selectedFeatures.join(',')}&nights=${nights}`);
+                const data = await response.json();
                 if (data.package) {
                     packagePrice = data.package_price;
                 }
