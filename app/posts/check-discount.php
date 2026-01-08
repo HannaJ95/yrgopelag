@@ -19,7 +19,9 @@ $statement->execute(['name' => $name]);
 $result = $statement->fetch();
 $has_bookings = isset($result['count']) && $result['count'] != 0;
 
+$discount_multiplier = 1 - (getHotelSettingsTable($database)['loyalty_discount']);
+
 echo json_encode([
-    'discount_multiplier' => $has_bookings ? 0.9 : 0,
+    'discount_multiplier' => $has_bookings ? $discount_multiplier : 0,
     'bookings_count' => $result['count']
 ]);
