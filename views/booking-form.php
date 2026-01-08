@@ -29,19 +29,19 @@
             <?php foreach ($grouped_features as $activity => $features_in_group) : ?>
 
                 <div class="feature-category">
-                    <h3><?= ucfirst($activity) ?></h3>
+                    <h3><?= htmlspecialchars(ucfirst($activity)) ?></h3>
 
                     <!-- Show features in it's category -->
                     <?php foreach ($features_in_group as $feature) : ?>
                         <div>
                             <input type="checkbox"
-                                id="feature-<?= $feature['id'] ?>"
+                                id="feature-<?= (int)$feature['id'] ?>"
                                 name="features[]"
-                                value="<?= $feature['id'] ?>"
-                                data-price="<?= $feature['price'] ?>"
+                                value="<?= (int)$feature['id'] ?>"
+                                data-price="<?= (int)$feature['price'] ?>"
                                 class="feature-checkbox">
-                            <label for="feature-<?= $feature['id'] ?>">
-                                <?= $feature['name'] ?> (<?= $feature['price'] ?> credits)
+                            <label for="feature-<?= (int)$feature['id'] ?>">
+                                <?= htmlspecialchars($feature['name']) ?> (<?= (int)$feature['price'] ?> credits)
                             </label>
                         </div>
                     <?php endforeach ?>
@@ -53,8 +53,8 @@
         <label for="room-select">Pick room</label>
         <select name="room_id" id="room-select">
             <?php foreach ($rooms as $room) : ?>
-                <option value="<?= $room['id'] ?>" data-price="<?= $room['price'] ?>">
-                    <?= $room['name'] ?> - <?= $room['category'] ?> (<?= $room['price'] ?> credits/night)
+                <option value="<?= (int)$room['id'] ?>" data-price="<?= (int)$room['price'] ?>">
+                    <?= htmlspecialchars($room['name']) ?> - <?= htmlspecialchars($room['category']) ?> (<?= (int)$room['price'] ?> credits/night)
                 </option>
             <?php endforeach ?>
         </select>
