@@ -68,3 +68,10 @@ function getActivePackageOffer(PDO $database) : array {
     $stmt->execute();
     return $stmt->fetchAll();
 }
+
+function getHotelSettingsTable(PDO $database): array
+{
+    $stmt = $database->prepare("SELECT * FROM hotel_settings LIMIT 1");
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
