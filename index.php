@@ -67,12 +67,12 @@ $loyalty_discount = $stmt->fetchColumn();
         <?php foreach ($rooms as $room) : ?>
 
             <div class="card">
-                <h1 class="card_h1"><?= $room['name']?></h1>
-                <h2 class="card_h2"><?= $room['category'] ?></h2>
+                <h1 class="card_h1"><?= htmlspecialchars($room['name']) ?></h1>
+                <h2 class="card_h2"><?= htmlspecialchars($room['category']) ?></h2>
                 <div class="card_img-holder">
-                    <img class="card_img" src="<?= $config['assets']['images']['rooms'] . $room['image'] ?>" alt="<?= htmlspecialchars($room['name']) ?>">
+                    <img class="card_img" src="<?= $config['assets']['images']['rooms'] . htmlspecialchars($room['image']) ?>" alt="<?= htmlspecialchars($room['name']) ?>">
                 </div>
-                <p><?= $room['price'] ?> / night</p>
+                <p><?= (int)$room['price'] ?> / night</p>
                 <div class="card_calendar">
 
                     <div class="calendar_days">
@@ -115,7 +115,8 @@ $loyalty_discount = $stmt->fetchColumn();
             <?php if ($loyalty_discount > 0) : ?>
                 <div class="offer_loyalty_discount">
                     <h2>LOYALTY DISCOUNT</h2>
-                    <p class="loyalty_discount_percentage"><?= $loyalty_discount * 100 ?>% OFF</p>
+                    <p class="loyalty_discount_percentage"><?= (float)$loyalty_discount * 100 ?>% OFF</p>
+                    <h2>for returning guests!</h2>
                 </div>
             <?php endif; ?>
 
@@ -123,13 +124,13 @@ $loyalty_discount = $stmt->fetchColumn();
 
             <?php foreach ($offers as $offer) : ?>
                 <article class="offer">
-                    <h3><?= $offer['package_name'] ?></h3>
-                    <p>Book 
-                        <?= $offer['nights'] > 1 ? ($offer['nights'] . ' nights') : 'one night' ?>
-                        at <?= $offer["room_name"] ?>
-                        with <?= $offer['count_activities'] > 1 ? ($offer['count_activities'] . ' activities: ') : 'one activity, ' ?>
-                        <?= formatFeaturesList($offer["feature_names"]) . ', ' ?>
-                        for <?= $offer['package_price'] ?> credits!
+                    <h3><?= htmlspecialchars($offer['package_name']) ?></h3>
+                    <p>Book
+                        <?= (int)$offer['nights'] > 1 ? ((int)$offer['nights'] . ' nights') : 'one night' ?>
+                        at <?= htmlspecialchars($offer["room_name"]) ?>
+                        with <?= (int)$offer['count_activities'] > 1 ? ((int)$offer['count_activities'] . ' activities: ') : 'one activity, ' ?>
+                        <?= htmlspecialchars(formatFeaturesList($offer["feature_names"])) . ', ' ?>
+                        for <?= (int)$offer['package_price'] ?> credits!
                     </p>
                 </article>
             <?php endforeach ?>
