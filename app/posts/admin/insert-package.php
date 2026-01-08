@@ -13,7 +13,6 @@ if (!isset($_POST['name'], $_POST['room_id'], $_POST['price'], $_POST['number_of
     $_SESSION['admin']['error'] = "All fields are required";
     redirect($config['paths']['admin']['index']);
 }
-
 //TODO: IF EMPTY - kolla det också??!!
 
 $name = htmlspecialchars($_POST['name']);
