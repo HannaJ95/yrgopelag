@@ -42,6 +42,10 @@ function formatFeaturesList($featureNames): string
     return implode(', ', $features) . ' and ' . $last;
 }
 
+//get loyalty discount
+$stmt = $database->query('SELECT loyalty_discount FROM hotel_settings LIMIT 1');
+$loyalty_discount = $stmt->fetchColumn();
+
 ?>
 
 <!DOCTYPE html>
@@ -107,7 +111,16 @@ function formatFeaturesList($featureNames): string
 
         <!-- OFFER -->
         <section class="offer_section">
+
+            <?php if ($loyalty_discount > 0) : ?>
+                <div class="offer_loyalty_discount">
+                    <h2>LOYALTY DISCOUNT</h2>
+                    <p class="loyalty_discount_percentage"><?= $loyalty_discount * 100 ?>% OFF</p>
+                </div>
+            <?php endif; ?>
+
             <h2>OFFERS</h2>
+
             <?php foreach ($offers as $offer) : ?>
                 <article class="offer">
                     <h3><?= $offer['package_name'] ?></h3>
