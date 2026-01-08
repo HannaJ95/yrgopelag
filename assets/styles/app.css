@@ -10,13 +10,14 @@
     --text-dim: #5a625a;
     --accent-sage: #5a6b5a;
     --glow-subtle: rgba(107, 122, 107, 0.1);
+    --red-discount: #c96b6b;
 }
 
 
 /*** HEADER.php ***/
 .main_header {
     margin-bottom: 3rem;
-    background-image: url("/assets/images/header-background.png");
+    background-image: url("../images/header-background.png");
     background-size: cover;
     background-position: center;
     /* background-attachment: fixed; */
@@ -27,15 +28,10 @@
     align-items: center;
     justify-content: center;
 }
-/* .header_img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-} */
+
 
 .header_stars {
     margin: 2rem;
-
     display: flex;
     gap: 2vw;
 }
@@ -50,7 +46,7 @@
 
 /*** BACKGROUND & BODY ***/
 body {
-    background-image: url("/assets/images/dark-background2.png");
+    background-image: url("../images/dark-background2.png");
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
@@ -62,8 +58,6 @@ body {
     position: relative;
     overflow-x: hidden;
 }
-
-
 
 /*** TYPOGRAPHY ***/
 h1, h2, h3 {
@@ -87,7 +81,6 @@ h1, h2, h3 {
 
 /*** INDIVIDUAL CARD ***/
 .card {
-    /* border: 1px solid rgba(107, 122, 107, 0.2); */
     border-radius: 1rem;
     padding: 2rem;
     position: relative;
@@ -139,7 +132,6 @@ h1, h2, h3 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* border-radius: 8px; */
 }
 
 /*** CALENDAR ***/
@@ -229,6 +221,19 @@ h1, h2, h3 {
 }
 
 /*** OFFERS ***/
+.offer_loyalty_discount h2 {
+    font-size: 1.5rem;
+    color: var(--red-discount);
+}
+.offer_loyalty_discount {
+    margin-bottom: 2rem;
+}
+.loyalty_discount_percentage {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--red-discount);
+}
+
 .offer_section {
     text-align: center;
     max-width: 30vw;
@@ -438,7 +443,6 @@ h1, h2, h3 {
     color: #e8b4b4;
     border-color: #6b2828;
     border: 1px solid rgba(107, 40, 40, 0.4);
-    /* border-left: 4px solid #6b2828; */
 }
 
 .message.success {
@@ -453,14 +457,20 @@ h1, h2, h3 {
 /* RECEIPT */
 .receipt_container {
     padding: 16px 20px;
-    border: 1px solid rgba(107, 122, 107, 0.4);
-    border-radius: 8px;
-    background: rgba(107, 122, 107, 0.05);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    animation: fadeIn 0.5s ease-out;
+}
+
+.receipt_details {
+    margin: 2rem 0;
 }
 
 /* STYLES FOR ADMINPAGE */
+.admin-body {
+    margin: 2rem;
+}
+
+.admin-body h2{
+    margin-top: 2rem;
+}
 .admin-nav {
     width: 100vw;
     height: 2rem;
