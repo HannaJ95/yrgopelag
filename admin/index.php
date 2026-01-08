@@ -59,6 +59,10 @@ $rooms = $stmt->fetchAll();
 $stmt = $database->query('SELECT * FROM packages');
 $packages = $stmt->fetchAll();
 
+//get loyalty discount decimal
+$stmt = $database->query('SELECT * FROM hotel_settings LIMIT 1');
+$hotel_settings = $stmt->fetch();
+
 function getPackageFeatures(PDO $database, $package_id): array
 {
 
@@ -107,6 +111,7 @@ foreach ($bookings as &$booking) {
         : [];
 }
 
+unset($booking);
 
 
 ?>
@@ -120,12 +125,12 @@ foreach ($bookings as &$booking) {
     <link rel="stylesheet" href="<?= $config['assets']['css']; ?>">
 </head>
 
-<body>
+<body class="admin-body">
 
     <!--*** LOG OUT OPTION VISIBLE IF SIGNED IN ***-->
     <nav class="admin-nav">
         <?php if (isset($_SESSION['user'])) { ?>
-            <a class="nav-link" href="../app/admin-users/logout.php">Logout</a>
+            <a class="nav-link" href="<?= $config['paths']['app']['admin-users']['logout']; ?>">Logout</a>
         <?php } ?>
     </nav>
 
@@ -148,7 +153,7 @@ foreach ($bookings as &$booking) {
         <?php } ?>
 
         <!-- input fields for email and password -->
-        <form action="<?= $config['paths']['posts']['admin']['login']; ?>" method="post">
+        <form action="<?= $config['paths']['app']['admin-users']['login']; ?>" method="post">
             <div>
                 <label for="email" class="admin-visually-hidden">Email</label>
                 <input class="form-control" type="email" name="email" id="email" placeholder="E-mail" required>
@@ -166,7 +171,7 @@ foreach ($bookings as &$booking) {
 
     <!-- WHEN LOGGED IN -->
     <?php if (isset($_SESSION['user'])) : ?>
-        <p>Welcome, <?php echo $_SESSION['user']['name']; ?>!</p>
+        <p>Welcome, <?= htmlspecialchars($_SESSION['user']['name']) ?>!</p>
 
         <!-- ADMIN NOTIFICATIONS -->
         <?php if (isset($_SESSION['admin']['error'])): ?>
@@ -186,7 +191,7 @@ foreach ($bookings as &$booking) {
         <?php endif; ?>
 
         <!-- DISPLAY ACOUNT CREDITS -->
-        <p>Credits: <?= $accountInfo['credit'] ?></p>
+        <p>Credits: <?= (int)$accountInfo['credit'] ?></p>
 
 
         <!-- BOUGHT FEATURES CENTRALBANKEN -->
@@ -227,14 +232,14 @@ foreach ($bookings as &$booking) {
             <tbody>
                 <?php foreach ($features as $feature): ?>
                     <tr>
-                        <td><?= $feature['id'] ?></td>
+                        <td><?= (int)$feature['id'] ?></td>
                         <td><?= htmlspecialchars($feature['name']) ?></td>
                         <td><?= htmlspecialchars($feature['activities']) ?></td>
                         <td><?= htmlspecialchars($feature['tier']) ?></td>
-                        <td><?= $feature['price'] ?></td>
+                        <td><?= (int)$feature['price'] ?></td>
                         <td>
                             <form method="POST" action="<?= $config['paths']['posts']['admin']['update_price']; ?>" style="display:inline;">
-                                <input type="hidden" name="feature_id" value="<?= $feature['id'] ?>">
+                                <input type="hidden" name="feature_id" value="<?= (int)$feature['id'] ?>">
                                 <input type="text" name="price">
                                 <button type="submit">OK</button>
                             </form>
@@ -243,14 +248,23 @@ foreach ($bookings as &$booking) {
                         <td><?= $feature['active'] ? '✅ Active' : '❌ Inactive' ?></td>
                         <td>
                             <form method="POST" action="<?= $config['paths']['posts']['admin']['toggle_active']; ?>" style="display:inline;">
-                                <input type="hidden" name="feature_id" value="<?= $feature['id'] ?>">
+                                <input type="hidden" name="feature_id" value="<?= (int)$feature['id'] ?>">
                                 <button type="submit">Toggle</button>
                             </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
                 <!--INSERT FEATURES FORM (BUY FROM CENTRALBANKEN)-->
-                <td><?= $feature['id'] + 1 ?></td>
+                <td>
+                    <?php 
+                    if (empty($features)) {
+                        echo 1;
+                    } else {
+                       echo $feature['id'] + 1;
+                    }
+                    
+                    ?>
+                </td>
                 <form method="POST" action="<?= $config['paths']['posts']['admin']['insert_features']; ?>">
                     <td><input type="text" name="name"></td>
                     <td><input type="text" name="activities"></td>
@@ -264,6 +278,28 @@ foreach ($bookings as &$booking) {
             </tbody>
         </table>
 
+        <!-- CURRENT LOYALTY DISCOUNT AND UPDATE FUNCTIONALITY -->
+        <h2>LOYALTY DISCOUNT:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Current discount</th>
+                    <th>Update discount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><?= (float)$hotel_settings['loyalty_discount'] * 100 ?>%</td>
+                    <td>
+                        <form method="POST" action="<?= $config['paths']['posts']['admin']['update_discount']; ?>" style="display:inline;">
+                                <input type="hidden" name="id" value="<?= (int)$hotel_settings['id'] ?>">
+                                <input type="number" name="loyalty_discount" min="0" max="100">
+                                <button type="submit">OK</button>
+                            </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
         <!-- DISPLAY DATABASE ROOMS TABLE WITH CHANGE PRICE FUNCTION -->
         <h2>DATABASE ROOMS TABLE:</h2>
@@ -280,13 +316,13 @@ foreach ($bookings as &$booking) {
             <tbody>
                 <?php foreach ($rooms as $room): ?>
                     <tr>
-                        <td><?= $room['id'] ?></td>
+                        <td><?= (int)$room['id'] ?></td>
                         <td><?= htmlspecialchars($room['name']) ?></td>
                         <td><?= htmlspecialchars($room['category']) ?></td>
-                        <td><?= htmlspecialchars($room['price']) ?></td>
+                        <td><?= (int)$room['price'] ?></td>
                         <td>
                             <form method="POST" action="<?= $config['paths']['posts']['admin']['update_price']; ?>" style="display:inline;">
-                                <input type="hidden" name="room_id" value="<?= $room['id'] ?>">
+                                <input type="hidden" name="room_id" value="<?= (int)$room['id'] ?>">
                                 <input type="text" name="price">
                                 <button type="submit">OK</button>
                             </form>
@@ -316,15 +352,15 @@ foreach ($bookings as &$booking) {
             <tbody>
                 <?php foreach ($packages as $package): ?>
                     <tr>
-                        <td><?= $package['id'] ?></td>
+                        <td><?= (int)$package['id'] ?></td>
                         <td><?= htmlspecialchars($package['name']) ?></td>
-                        <td><?= htmlspecialchars($package['room_id']) ?></td>
-                        <td><?= $package['price'] ?></td>
-                        <td><?= htmlspecialchars($package['number_of_nights']) ?></td>
+                        <td><?= (int)$package['room_id'] ?></td>
+                        <td><?= (int)$package['price'] ?></td>
+                        <td><?= (int)$package['number_of_nights'] ?></td>
                         <td>
                             <?php
-                            $features = getPackageFeatures($database, $package['id']);
-                            foreach ($features as $f) : ?>
+                            $package_features = getPackageFeatures($database, $package['id']);
+                            foreach ($package_features as $f) : ?>
                                 <ul>
                                     <li><?= htmlspecialchars($f['name']) ?></li>
                                 </ul>
@@ -334,7 +370,7 @@ foreach ($bookings as &$booking) {
                         <td><?= $package['active'] ? '✅ Active' : '❌ Inactive' ?></td>
                         <td>
                             <form method="POST" action="<?= $config['paths']['posts']['admin']['toggle_active']; ?>" style="display:inline;">
-                                <input type="hidden" name="package_id" value="<?= $package['id'] ?>">
+                                <input type="hidden" name="package_id" value="<?= (int)$package['id'] ?>">
                                 <button type="submit">Toggle</button>
                             </form>
                         </td>
@@ -343,7 +379,15 @@ foreach ($bookings as &$booking) {
                 <?php endforeach; ?>
                 <!-- INSERT PACKAGE ROW -->
                 <tr>
-                    <td><?= $package['id'] + 1 ?></td>
+                    <td>
+                        <?php 
+                        if (empty($features)) {
+                            echo 1;
+                        } else {
+                        echo $feature['id'] + 1;
+                        }
+                        ?>
+                    </td>
                     <form method="POST" action="<?= $config['paths']['posts']['admin']['insert_package']; ?>">
                         <td><input type="text" name="name"></td>
                         <td><input type="text" name="room_id"></td>
@@ -354,13 +398,13 @@ foreach ($bookings as &$booking) {
                                 <ul>
                                     <li>
                                         <input type="checkbox"
-                                            id="feature-<?= $feature['id'] ?>"
+                                            id="feature-<?= (int)$feature['id'] ?>"
                                             name="features[]"
-                                            value="<?= $feature['id'] ?>"
-                                            data-price="<?= $feature['price'] ?>"
+                                            value="<?= (int)$feature['id'] ?>"
+                                            data-price="<?= (int)$feature['price'] ?>"
                                             class="feature-checkbox">
-                                        <label for="feature-<?= $feature['id'] ?>">
-                                            <?= $feature['name'] ?>
+                                        <label for="feature-<?= (int)$feature['id'] ?>">
+                                            <?= htmlspecialchars($feature['name']) ?>
                                         </label>
                                     </li>
                                 </ul>
@@ -388,31 +432,37 @@ foreach ($bookings as &$booking) {
                     <th>Departure</th>
                     <th>Total Cost</th>
                     <th>Features</th>
+                    <th>Star Rating</th>
+                    <th>Transfer Code</th>
+                    <th>Receipt ID</th>
                     <th>Created</th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($bookings as $booking): ?>
                     <tr>
-                        <td><?= $booking['id'] ?></td>
+                        <td><?= (int)$booking['id'] ?></td>
                         <td><?= htmlspecialchars($booking['guest_name']) ?></td>
                         <td><?= htmlspecialchars($booking['room_name']) ?></td>
                         <td><?= htmlspecialchars($booking['room_category']) ?></td>
-                        <td><?= $booking['arrival_date'] ?></td>
-                        <td><?= $booking['departure_date'] ?></td>
-                        <td><?= $booking['total_cost'] ?></td>
+                        <td><?= htmlspecialchars($booking['arrival_date']) ?></td>
+                        <td><?= htmlspecialchars($booking['departure_date']) ?></td>
+                        <td><?= (int)$booking['total_cost'] ?></td>
                         <td>
                             <?php if (!empty($booking['features'])): ?>
                                 <ul>
-                                    <?php foreach ($booking['features'] as $feature): ?>
-                                        <li><?= htmlspecialchars($feature) ?></li>
+                                    <?php foreach ($booking['features'] as $feature_name): ?>
+                                        <li><?= htmlspecialchars($feature_name) ?></li>
                                     <?php endforeach; ?>
                                 </ul>
                             <?php else: ?>
                                 -
                             <?php endif; ?>
                         </td>
-                        <td><?= $booking['created_at'] ?></td>
+                        <td><?= (int)$booking['star_rating'] ?></td>
+                        <td><?= htmlspecialchars($booking['transfer_code']) ?></td>
+                        <td><?= htmlspecialchars($booking['receipt_id']) ?></td>
+                        <td><?= htmlspecialchars($booking['created_at']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -440,6 +490,6 @@ foreach ($bookings as &$booking) {
             }
         });
     </script>
-    
+
 </body>
 </html>
