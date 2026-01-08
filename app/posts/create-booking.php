@@ -168,7 +168,7 @@ if ($package_price !== null) {
 
 
 //*** IF GUEST BOOKED MULTIPLE TIMES - GIVE A DISCOUNT ON TOTAL PRICE ***//
-$discount_multiplier = 0.9;
+$discount_multiplier = 1 - (getHotelSettingsTable($database)['loyalty_discount']);
 
 $statement = $database->prepare('SELECT COUNT(*) as count 
         FROM bookings b
@@ -206,10 +206,10 @@ try {
     if ($e->hasResponse()) {
 
         $error = json_decode($e->getResponse()->getBody()->getContents(), true);
-        $_SESSION['error'] = $error['error'] ?? "The transfercode is not valid";
+        $_SESSION['error'] = $error['error'] ?? "Name or api_key is not valid";
 
     } else {
-        $_SESSION['error'] = "The transfercode is not valid";
+        $_SESSION['error'] = "Name or api_key is not valid";
     }
 
     redirect($config['paths']['index']);
@@ -218,12 +218,11 @@ try {
 
 
 if ($status != 'success') {
-    $_SESSION['error'] = "The transfercode is not valid";
+    $_SESSION['error'] = $response['message'] ?? "Name or api_key is not valid";
     redirect($config['paths']['index']);
 }
 
 $transfercode = $response['transferCode'];
-
 
 
 //*** 4. CHECK IF TRANSFERCODE IS VALID - IF TRUE CONTINUE WITH BOOKING (TRANSFERCODE) ***//
@@ -249,7 +248,7 @@ try {
         $_SESSION['error'] = $error['error'] ?? "The transfercode is not valid";
 
     } else {
-        $_SESSION['error'] = "The transfercode is not valid";
+        $_SESSION['error'] = $response['message'] ?? "The transfercode is not valid";
     }
 
     redirect($config['paths']['index']);
@@ -257,12 +256,15 @@ try {
 
 
 if ($success != 'success') {
-    $_SESSION['error'] = "The transfercode is not valid";
+    $_SESSION['error'] = $response['message'] ?? "The transfercode is not valid";
     redirect($config['paths']['index']);
 }
 
 
 //*** 5. SEND RECEIPT TO CENTRALBANK (RECEIPT) ***//
+
+// get hotel-stars
+$star_rating = getIslandStars();
 
 //get the featureslist with names and tiers for receipt
 $features_for_receipt = [];
@@ -287,11 +289,13 @@ try {
             "arrival_date" => $arrival,
             "departure_date" => $departure,
             "features_used" => $features_for_receipt,
-            "star_rating" => 1
+            "star_rating" => $star_rating
         ]
     ]);
 
     $receipt_response = json_decode($response->getBody()->getContents(), true);
+
+    $_SESSION['receipt'] = $receipt_response;
 
 } catch (RequestException $e) {
 
@@ -316,7 +320,7 @@ if (!str_contains($receipt_response['status'], "success")) {
 
 //**** 6. INSER BOOKING-DATA INTO BOOKINGS TABLE ***//
 
-$query_insert_booking = 'INSERT INTO bookings (guest_id, room_id, arrival_date, departure_date, total_cost, transfer_code) VALUES (:guest_id, :room_id, :arrival_date, :departure_date, :total_cost, :transfer_code)';
+$query_insert_booking = 'INSERT INTO bookings (guest_id, room_id, arrival_date, departure_date, total_cost, transfer_code, star_rating, receipt_id) VALUES (:guest_id, :room_id, :arrival_date, :departure_date, :total_cost, :transfer_code, :star_rating, :receipt_id)';
 
 $guest = getGuest($database, $name);
 
@@ -327,7 +331,9 @@ $statement->execute([
     'arrival_date' => $arrival,
     'departure_date' => $departure,
     'total_cost' => $total_cost,
-    'transfer_code' => $transfercode
+    'transfer_code' => $transfercode,
+    'star_rating' => $star_rating,
+    'receipt_id' => $receipt_response['receipt_id']
 ]);
 
 $booking_id = $database->lastInsertId();
@@ -378,21 +384,6 @@ if (!str_contains($deposit_response['status'], "success")) {
     redirect($config['paths']['index']);
 }
 
-
-//TODO: SKRIV UT "KVITTOT TILL GÄSTEN, ändra header()"
-//Save receipt for guest
-$_SESSION['receipt'] = [
-    'booking_id' => $booking_id,
-    'guest_name' => $name,
-    'room_id' => $room_id,
-    'arrival' => $arrival,
-    'departure' => $departure,
-    'total_cost' => $total_cost,
-    'features' => $features_for_receipt,
-    'receipt_response' => $receipt_response
-];
-
-//när bokningen är lyckad, skriv ut kvitto
-
+//*** 9. SUCCESS - REDIRECT TO RECEIPT-PAGE ***//
 $_SESSION['success'] = "Booking successful!";
 redirect($config['paths']['receipt']);
