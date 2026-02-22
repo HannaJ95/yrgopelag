@@ -42,7 +42,7 @@ The project includes a protected admin panel where the hotel manager can update 
 
 ## Notes
 
-Hotel and room images were created using Canva.
+Images were AI-generated using Canva.
 
 ## Code Review
 
