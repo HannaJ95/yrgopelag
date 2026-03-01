@@ -1,6 +1,6 @@
 # Yrgopelag – Lost Island Hotel
 
-**Live site:** https://hannajohansson01.se/yrgopelag/
+**Live site:** https://hannajohansson01.se/LOST-ISLAND-HOTEL/
 
 A hotel booking system for a fictional island, built as a school project at the end of the first semester, December 2025 – January 2026. Inspired by the TV series LOST.
 
